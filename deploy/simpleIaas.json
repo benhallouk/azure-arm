@@ -1,0 +1,82 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "fbdwtemplatestorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "fbdwTemplateStorageNamePrefix": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "fbdwstore"
+    }
+
+  },
+  "variables": {
+      "fbdw-vnet-templatePrefix": "10.0.0.0/16",
+      "fbdw-vnet-templateSubnet1Name": "Subnet-1",
+      "fbdw-vnet-templateSubnet1Prefix": "10.0.0.0/24",
+      "fbdw-vnet-templateSubnet2Name": "Subnet-2",
+      "fbdw-vnet-templateSubnet2Prefix": "10.0.1.0/24",
+      "fbdwtemplatestorageName": "[concat(parameters('fbdwTemplateStorageNamePrefix'), uniqueString(resourceGroup().id))]"
+
+  },
+  "resources": [
+      {
+          "name": "fbdw-vnet-template",
+          "type": "Microsoft.Network/virtualNetworks",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "fbdw-vnet-template"
+          },
+          "properties": {
+              "addressSpace": {
+                  "addressPrefixes": [
+                      "[variables('fbdw-vnet-templatePrefix')]"
+                  ]
+              },
+              "subnets": [
+                  {
+                      "name": "[variables('fbdw-vnet-templateSubnet1Name')]",
+                      "properties": {
+                          "addressPrefix": "[variables('fbdw-vnet-templateSubnet1Prefix')]"
+                      }
+                  },
+                  {
+                      "name": "[variables('fbdw-vnet-templateSubnet2Name')]",
+                      "properties": {
+                          "addressPrefix": "[variables('fbdw-vnet-templateSubnet2Prefix')]"
+                      }
+                  }
+              ]
+          }
+      },
+      {
+          "name": "[variables('fbdwtemplatestorageName')]",
+          "type": "Microsoft.Storage/storageAccounts",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "[variables('fbdwtemplatestorageName')]"
+          },
+          "properties": {
+              "accountType": "[parameters('fbdwtemplatestorageType')]"
+          }
+      }
+
+  ],
+  "outputs": {
+
+  }
+}
